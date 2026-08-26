@@ -1,0 +1,12 @@
+## Interface: 120001
+## Title: Raid Engine
+## Notes: Evidence-bound raid tasks and loadout capture
+## Author: Raid Engine
+## Version: 0.1.0
+## SavedVariables: RaidEngineSavedVariables
+
+RaidEngine_Json.lua
+RaidEngine_Contract.lua
+RaidEngine_Loadout.lua
+RaidEngine_Plan.lua
+RaidEngine.lua
