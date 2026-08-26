@@ -11,6 +11,10 @@ local function requireString(value, label)
   requireType(value, "string", label)
   if value == "" then fail(label .. " must not be empty") end
 end
+local function requireTimestamp(value, label)
+  requireString(value, label)
+  if not value:match("^%d%d%d%d%-%d%d%-%d%dT%d%d:%d%d:%d%d") then fail(label .. " must be an ISO-8601 timestamp") end
+end
 local function requireHash(value, label)
   requireString(value, label)
   if not value:match("^sha256:[0-9a-fA-F]+$") then fail(label .. " must be a sha256 reference") end
@@ -18,7 +22,8 @@ end
 local function allowedKeys(value, keys, label)
   for key in pairs(value) do if not keys[key] then fail(label .. " contains unsupported field " .. tostring(key)) end end
 end
-local function evidenceValue(value, label)
+local evidenceValue
+evidenceValue = function(value, label)
   requireType(value, "table", label)
   allowedKeys(value, { state = true, value = true, evidence_status = true, provenance_refs = true, limitations = true }, label)
   requireString(value.state, label .. ".state")
@@ -32,8 +37,12 @@ local function root(value, kind)
   requireString(value.schema_version, kind .. ".schema_version")
   if value.schema_version ~= "0.1.0" and value.schema_version ~= "0.2.0" then fail(kind .. ".schema_version is unsupported") end
   if value.contract_kind ~= kind then fail(kind .. ".contract_kind mismatch") end
-  requireString(value.document_id, kind .. ".document_id"); requireString(value.producer, kind .. ".producer"); requireString(value.producer_version, kind .. ".producer_version"); requireString(value.created_at, kind .. ".created_at")
+  requireString(value.document_id, kind .. ".document_id"); requireString(value.producer, kind .. ".producer"); requireString(value.producer_version, kind .. ".producer_version"); requireTimestamp(value.created_at, kind .. ".created_at")
   requireType(value.scope, "table", kind .. ".scope"); requireString(value.scope.game_version, kind .. ".scope.game_version")
+  for _, dimension in ipairs({ "build", "region", "locale", "difficulty" }) do evidenceValue(value.scope[dimension], kind .. ".scope." .. dimension) end
+  requireString(value.evidence_status, kind .. ".evidence_status")
+  requireType(value.coverage, "table", kind .. ".coverage"); requireString(value.coverage.state, kind .. ".coverage.state")
+  if value.coverage.state ~= "COMPLETE" and value.coverage.state ~= "PARTIAL" and value.coverage.state ~= "UNKNOWN" and value.coverage.state ~= "NOT_REQUESTED" and value.coverage.state ~= "FAILED" then fail(kind .. ".coverage.state is invalid") end
   requireType(value.limitations, "table", kind .. ".limitations"); requireType(value.provenance_refs, "table", kind .. ".provenance_refs")
 end
 local function identity(value, label, namespaces)
@@ -45,7 +54,7 @@ end
 function Contract.assertLoadout(value)
   root(value, "PlayerLoadoutSnapshot")
   allowedKeys(value, { schema_version = true, contract_kind = true, document_id = true, producer = true, producer_version = true, created_at = true, scope = true, evidence_status = true, coverage = true, limitations = true, provenance_refs = true, loadout_snapshot_id = true, roster_snapshot_ref = true, participation_id = true, captured_at = true, source = true, class_ref = true, specialization_ref = true, selected_trait_refs = true, selected_ability_refs = true, equipment_refs = true, selection_coverage = true }, "PlayerLoadoutSnapshot")
-  requireString(value.loadout_snapshot_id, "loadout_snapshot_id"); requireString(value.participation_id, "participation_id"); requireString(value.captured_at, "captured_at")
+  requireString(value.loadout_snapshot_id, "loadout_snapshot_id"); requireString(value.participation_id, "participation_id"); requireTimestamp(value.captured_at, "captured_at")
   requireType(value.roster_snapshot_ref, "table", "roster_snapshot_ref"); requireString(value.roster_snapshot_ref.document_id, "roster_snapshot_ref.document_id"); requireHash(value.roster_snapshot_ref.content_hash, "roster_snapshot_ref.content_hash")
   requireString(value.source, "source"); if value.source ~= "ADDON" then fail("source must be ADDON") end
   evidenceValue(value.specialization_ref, "specialization_ref"); if value.class_ref then evidenceValue(value.class_ref, "class_ref") end
@@ -73,7 +82,11 @@ function Contract.assertExecutionSnapshot(value)
   for _, key in ipairs({ "plan_version_ref", "leader_decision_ref" }) do local ref = value[key]; requireType(ref, "table", key); allowedKeys(ref, { document_id = true, content_hash = true }, key); requireString(ref.document_id, key .. ".document_id"); requireHash(ref.content_hash, key .. ".content_hash") end
   if value.raid_night_ref then requireType(value.raid_night_ref, "table", "raid_night_ref"); requireString(value.raid_night_ref.document_id, "raid_night_ref.document_id"); requireHash(value.raid_night_ref.content_hash, "raid_night_ref.content_hash") end
   if value.roster_snapshot_ref then requireType(value.roster_snapshot_ref, "table", "roster_snapshot_ref"); requireString(value.roster_snapshot_ref.document_id, "roster_snapshot_ref.document_id"); requireHash(value.roster_snapshot_ref.content_hash, "roster_snapshot_ref.content_hash") end
-  local task = value.task; requireType(task, "table", "task"); allowedKeys(task, { task_id = true, kind = true, raid_cooldown_ability_id = true, coverage_ability_ids = true, target_window_ms = true, leader_roster_id = true, backup_roster_id = true }, "task"); requireString(task.task_id, "task.task_id"); requireString(task.kind, "task.kind"); requireType(task.target_window_ms, "table", "task.target_window_ms"); requireType(task.target_window_ms.start, "number", "task.target_window_ms.start"); requireType(task.target_window_ms["end"], "number", "task.target_window_ms.end"); if task.target_window_ms.start > task.target_window_ms["end"] then fail("task window is reversed") end; requireString(task.leader_roster_id, "task.leader_roster_id"); requireString(task.backup_roster_id, "task.backup_roster_id")
+  local task = value.task; requireType(task, "table", "task"); allowedKeys(task, { task_id = true, kind = true, raid_cooldown_ability_id = true, coverage_ability_ids = true, target_window_ms = true, leader_roster_id = true, backup_roster_id = true }, "task"); requireString(task.task_id, "task.task_id"); requireString(task.kind, "task.kind");
+  local kinds = { USE_RAID_COOLDOWN_IN_WINDOW = true, ASSIGN_DISPEL_COVERAGE = true, ASSIGN_INTERRUPT_COVERAGE = true, ASSIGN_TANK_SWAP = true, ASSIGN_POSITION_SOAK = true, ASSIGN_ADD_MANAGEMENT = true }
+  if not kinds[task.kind] then fail("task.kind is unsupported") end
+  requireType(task.target_window_ms, "table", "task.target_window_ms"); requireType(task.target_window_ms.start, "number", "task.target_window_ms.start"); requireType(task.target_window_ms["end"], "number", "task.target_window_ms.end"); if task.target_window_ms.start < 0 or task.target_window_ms["end"] < 0 or task.target_window_ms.start > task.target_window_ms["end"] then fail("task window is invalid") end; requireString(task.leader_roster_id, "task.leader_roster_id"); requireString(task.backup_roster_id, "task.backup_roster_id")
+  if task.kind == "USE_RAID_COOLDOWN_IN_WINDOW" then requireType(task.raid_cooldown_ability_id, "number", "task.raid_cooldown_ability_id") else requireType(task.coverage_ability_ids, "table", "task.coverage_ability_ids"); for index, id in ipairs(task.coverage_ability_ids) do requireType(id, "number", "task.coverage_ability_ids[" .. index .. "]"); if id < 0 or id % 1 ~= 0 then fail("coverage ability id is invalid") end end end
   return true
 end
 
