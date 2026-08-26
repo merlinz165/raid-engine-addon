@@ -11,6 +11,7 @@ end
 load("RaidEngine_Json.lua")
 load("RaidEngine_Contract.lua")
 load("RaidEngine_Plan.lua")
+load("RaidEngine_Timeline.lua")
 
 local encoded = addon.Json.encode({ z = 2, a = { true, "ok" } })
 assert(encoded == '{"a":[true,"ok"],"z":2}', encoded)
@@ -39,3 +40,10 @@ plan.confirmed = false
 ok = pcall(function() addon.Contract.assertExecutionSnapshot(plan) end)
 assert(not ok)
 print("addon behavior checks passed")
+
+local record = { encounterID = 3421, instanceID = 3004, events = {} }
+assert(addon.Timeline._appendEvent(record, "ENCOUNTER_TIMELINE_EVENT_ADDED", { source = 0, duration = 41.25 }, 0.5, 0.25, 0))
+assert(record.events[1].time == 0.25 and record.events[1].duration == 41.25)
+assert(not addon.Timeline._appendEvent(record, "ENCOUNTER_TIMELINE_EVENT_ADDED", { source = 1, duration = 99 }, 1, 0, 0))
+for _ = 1, 600 do addon.Timeline._appendEvent(record, "ENCOUNTER_TIMELINE_EVENT_REMOVED", { source = 0 }, 1, nil, 3) end
+assert(#record.events == 512)

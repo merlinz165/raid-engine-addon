@@ -9,4 +9,5 @@ RaidEngine_Json.lua
 RaidEngine_Contract.lua
 RaidEngine_Loadout.lua
 RaidEngine_Plan.lua
+RaidEngine_Timeline.lua
 RaidEngine.lua

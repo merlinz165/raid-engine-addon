@@ -11,7 +11,7 @@ local function binding()
   return RaidEngineSavedVariables.binding
 end
 local function usage()
-  message("命令：bind <participation_id> <roster_snapshot_id> <sha256:...>；capture；export；import <JSON>；status；clear confirm")
+  message("命令：bind <participation_id> <roster_snapshot_id> <sha256:...>；capture；export；import <JSON>；timeline；status；clear confirm")
 end
 local function splitFirst(text)
   local command, rest = text:match("^(%S+)%s*(.-)%s*$")
@@ -37,11 +37,14 @@ local function handle(commandText)
     local ok, result = pcall(addon.Plan.import, rest)
     if not ok then message(result); return end
     RaidEngineSavedVariables.confirmed_plan = result; message("已导入并校验确认计划：\n" .. addon.Plan.render(result))
+  elseif command == "timeline" then
+    local state = addon.Timeline and addon.Timeline.status and addon.Timeline.status() or { state = "UNAVAILABLE" }
+    message("官方时间轴采集：" .. tostring(state.state) .. "；记录=" .. tostring(state.record_count or 0) .. "；战斗中事件=" .. tostring(state.event_count or 0) .. "。仅保存去标识化事件聚合，交给 Core 提取。")
   elseif command == "status" then
     local state = RaidEngineSavedVariables or {}; local loadout = state.last_loadout; local plan = state.confirmed_plan
     message("版本 " .. addon.version .. "；Loadout=" .. (loadout and loadout.loadout_snapshot_id or "未采集") .. "；确认计划=" .. (plan and plan.package.execution_snapshot_id or "未导入"))
   elseif command == "clear" and rest == "confirm" then
-    RaidEngineSavedVariables.last_loadout = nil; RaidEngineSavedVariables.last_loadout_export = nil; RaidEngineSavedVariables.confirmed_plan = nil; message("已清除本地快照、导出缓存和确认计划；绑定信息保留。")
+    RaidEngineSavedVariables.last_loadout = nil; RaidEngineSavedVariables.last_loadout_export = nil; RaidEngineSavedVariables.confirmed_plan = nil; RaidEngineSavedVariables.timelineLog = nil; message("已清除本地快照、导出缓存、时间轴和确认计划；绑定信息保留。")
   else usage() end
 end
 
