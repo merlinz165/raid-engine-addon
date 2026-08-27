@@ -22,7 +22,7 @@ local function handle(commandText)
   local command, rest = splitFirst(commandText)
   if command == "bind" then
     local participation, rosterID, rosterHash = rest:match("^(%S+)%s+(%S+)%s+(%S+)%s*$")
-    if not participation or not rosterID or not rosterHash or not rosterHash:match("^sha256:[0-9a-fA-F]+$") then message("bind 参数无效；需要 participation_id、roster_snapshot_id、sha256 引用"); return end
+    if not participation or not rosterID or not rosterHash or not (rosterHash:match("^sha256:[0-9a-f]+$") and #rosterHash == 71) then message("bind 参数无效；需要 participation_id、roster_snapshot_id、64 位小写 sha256 引用"); return end
     local state = binding(); state.participation_id = participation; state.roster_snapshot_ref = { document_id = rosterID, content_hash = rosterHash }; message("已绑定本地采集上下文；不会保存云端凭据。")
   elseif command == "capture" then
     local ok, result = pcall(addon.Loadout.capture, binding())

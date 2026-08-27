@@ -25,6 +25,11 @@ local loadout = {
   scope = { game_version = "12.0.1", build = { state = "UNKNOWN", evidence_status = "UNKNOWN", provenance_refs = {} }, region = { state = "UNKNOWN", evidence_status = "UNKNOWN", provenance_refs = {} }, locale = { state = "KNOWN", value = "zhCN", evidence_status = "PARTIAL", provenance_refs = {} }, difficulty = { state = "UNKNOWN", evidence_status = "UNKNOWN", provenance_refs = {} } }, evidence_status = "PARTIAL", coverage = { state = "PARTIAL" }, limitations = {}, provenance_refs = {}, loadout_snapshot_id = "addon-local:test", roster_snapshot_ref = { document_id = "roster:test", content_hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, participation_id = "participation:test", captured_at = "2026-08-26T00:00:00Z", source = "ADDON", specialization_ref = { state = "UNKNOWN", evidence_status = "UNKNOWN", provenance_refs = {} }, selected_trait_refs = {}, selected_ability_refs = {}, equipment_refs = {}, selection_coverage = "UNKNOWN"
 }
 assert(addon.Contract.assertLoadout(loadout))
+local invalidHashLoadout = addon.Json.decode(addon.Json.encode(loadout))
+invalidHashLoadout.roster_snapshot_ref.content_hash = "sha256:abc"
+assert(not pcall(function() addon.Contract.assertLoadout(invalidHashLoadout) end))
+invalidHashLoadout.roster_snapshot_ref.content_hash = "sha256:" .. string.rep("A", 64)
+assert(not pcall(function() addon.Contract.assertLoadout(invalidHashLoadout) end))
 local ok = pcall(function() addon.Contract.assertLoadout({}) end)
 assert(not ok)
 

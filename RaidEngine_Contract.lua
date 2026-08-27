@@ -17,7 +17,7 @@ local function requireTimestamp(value, label)
 end
 local function requireHash(value, label)
   requireString(value, label)
-  if not value:match("^sha256:[0-9a-fA-F]+$") then fail(label .. " must be a sha256 reference") end
+  if not (value:match("^sha256:[0-9a-f]+$") and #value == 71) then fail(label .. " must be a 64-character lowercase sha256 reference") end
 end
 local function allowedKeys(value, keys, label)
   for key in pairs(value) do if not keys[key] then fail(label .. " contains unsupported field " .. tostring(key)) end end
