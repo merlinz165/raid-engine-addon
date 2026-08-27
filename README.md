@@ -5,7 +5,7 @@ project was formally initiated on 2026-08-26.
 
 Its first release is intentionally thin:
 
-- capture the current player's class, specialization, talents, selected abilities,
+- capture the current player's class, specialization, talents, action-bar selected abilities,
   and equipment as a versioned `PlayerLoadoutSnapshot`;
 - capture permitted official Encounter Timeline and minimal Raid Night context;
 - import a raid-leader-confirmed plan package and show personal tasks/reminders;
@@ -51,3 +51,8 @@ bounded, de-identified official timeline lifecycle and duration events under
 file to Core's `pnpm extract-official-timeline-batch` command. Confirmed plan
 packages are imported with `/raidengine import <JSON>` and are displayed only; the
 AddOn never auto-casts, moves, or changes a confirmed plan.
+
+Action-bar spell IDs are captured as a bounded selected-ability observation. This
+is intentionally `PARTIAL`: passive abilities, unbound spells, and the complete
+talent graph still require Core's governed official data and are not inferred by
+the AddOn.

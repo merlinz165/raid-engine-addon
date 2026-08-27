@@ -12,6 +12,7 @@ load("RaidEngine_Json.lua")
 load("RaidEngine_Contract.lua")
 load("RaidEngine_Plan.lua")
 load("RaidEngine_Timeline.lua")
+load("RaidEngine_Loadout.lua")
 
 local encoded = addon.Json.encode({ z = 2, a = { true, "ok" } })
 assert(encoded == '{"a":[true,"ok"],"z":2}', encoded)
@@ -47,3 +48,22 @@ assert(record.events[1].time == 0.25 and record.events[1].duration == 41.25)
 assert(not addon.Timeline._appendEvent(record, "ENCOUNTER_TIMELINE_EVENT_ADDED", { source = 1, duration = 99 }, 1, 0, 0))
 for _ = 1, 600 do addon.Timeline._appendEvent(record, "ENCOUNTER_TIMELINE_EVENT_REMOVED", { source = 0 }, 1, nil, 3) end
 assert(#record.events == 512)
+
+-- The client snapshot records bounded action-bar spell observations while
+-- keeping the overall selection explicitly PARTIAL.
+function GetBuildInfo() return "12.1.0", "", "", "69382" end
+function GetLocale() return "zhCN" end
+function UnitClass() return "圣骑士", "PALADIN", 2 end
+function GetSpecialization() return nil end
+function GetActionInfo(slot)
+  if slot == 1 then return "spell", 1289855 end
+  if slot == 2 then return "spell", 31821 end
+  if slot == 3 then return "spell", 1289855 end
+  return nil, nil
+end
+function GetInventoryItemID() return nil end
+RaidEngineSavedVariables = {}
+local captured = addon.Loadout.capture({ participation_id = "participation:test", roster_snapshot_ref = { document_id = "roster:test", content_hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } })
+assert(captured.selection_coverage == "PARTIAL")
+assert(#captured.selected_ability_refs == 2)
+assert(captured.selected_ability_refs[1].id == 31821 and captured.selected_ability_refs[2].id == 1289855)
