@@ -55,4 +55,6 @@ AddOn never auto-casts, moves, or changes a confirmed plan.
 Action-bar spell IDs are captured as a bounded selected-ability observation. This
 is intentionally `PARTIAL`: passive abilities, unbound spells, and the complete
 talent graph still require Core's governed official data and are not inferred by
-the AddOn.
+the AddOn. Activity bindings and imported contract references now require the
+canonical lowercase `sha256:` plus 64 hexadecimal characters; malformed or
+uppercase references are rejected before capture or display.
