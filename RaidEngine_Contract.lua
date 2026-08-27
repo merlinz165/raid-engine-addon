@@ -13,7 +13,10 @@ local function requireString(value, label)
 end
 local function requireTimestamp(value, label)
   requireString(value, label)
-  if not value:match("^%d%d%d%d%-%d%d%-%d%dT%d%d:%d%d:%d%d") then fail(label .. " must be an ISO-8601 timestamp") end
+  local year, month, day, hour, minute, second = value:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)Z$")
+  if not year then fail(label .. " must be a UTC ISO-8601 timestamp") end
+  month, day, hour, minute, second = tonumber(month), tonumber(day), tonumber(hour), tonumber(minute), tonumber(second)
+  if month < 1 or month > 12 or day < 1 or day > 31 or hour > 23 or minute > 59 or second > 60 then fail(label .. " contains an invalid date or time") end
 end
 local function requireHash(value, label)
   requireString(value, label)

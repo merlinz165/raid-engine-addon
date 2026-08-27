@@ -6,8 +6,10 @@ local Contract = addon.Contract
 
 local function timestampKey(value)
   if type(value) ~= "string" then return nil end
-  local year, month, day, hour, minute, second = value:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
+  local year, month, day, hour, minute, second = value:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)Z$")
   if not year then return nil end
+  year, month, day, hour, minute, second = tonumber(year), tonumber(month), tonumber(day), tonumber(hour), tonumber(minute), tonumber(second)
+  if month < 1 or month > 12 or day < 1 or day > 31 or hour > 23 or minute > 59 or second > 60 then return nil end
   return (((((tonumber(year) * 12 + tonumber(month)) * 31 + tonumber(day)) * 24 + tonumber(hour)) * 60 + tonumber(minute)) * 60 + tonumber(second))
 end
 local function assertTemporalValidity(value, now)

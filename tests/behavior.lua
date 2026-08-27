@@ -42,6 +42,9 @@ assert(imported and importedValue.package.confirmed == true)
 plan.scope.effective_until = "2020-01-01T00:00:00Z"
 imported = pcall(addon.Plan.import, addon.Json.encode(plan))
 assert(not imported)
+plan.scope.effective_until = "2026-99-01T00:00:00Z"
+imported = pcall(addon.Plan.import, addon.Json.encode(plan))
+assert(not imported)
 plan.confirmed = false
 ok = pcall(function() addon.Contract.assertExecutionSnapshot(plan) end)
 assert(not ok)

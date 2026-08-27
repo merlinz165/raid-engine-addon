@@ -57,4 +57,6 @@ is intentionally `PARTIAL`: passive abilities, unbound spells, and the complete
 talent graph still require Core's governed official data and are not inferred by
 the AddOn. Activity bindings and imported contract references now require the
 canonical lowercase `sha256:` plus 64 hexadecimal characters; malformed or
-uppercase references are rejected before capture or display.
+uppercase references are rejected before capture or display. Imported plan
+timestamps must also be complete UTC (`...Z`) values with valid bounded date/time
+components; malformed expiry windows are rejected before display.
