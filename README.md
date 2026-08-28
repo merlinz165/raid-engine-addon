@@ -60,3 +60,7 @@ canonical lowercase `sha256:` plus 64 hexadecimal characters; malformed or
 uppercase references are rejected before capture or display. Imported plan
 timestamps must also be complete UTC (`...Z`) values with valid bounded date/time
 components; malformed expiry windows are rejected before display.
+
+Plan expiry comparisons now normalize the current UTC clock through the same
+structured time key as `effective_from`/`effective_until`, so future-dated
+confirmed plans are not rejected by a representation mismatch.
