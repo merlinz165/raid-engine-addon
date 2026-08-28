@@ -25,10 +25,14 @@ local function assertTemporalValidity(value, now)
   end
 end
 
+local function currentTimeKey()
+  return timestampKey(date("!%Y-%m-%dT%H:%M:%SZ"))
+end
+
 function Plan.import(serialized)
   local value = Json.decode(serialized)
   Contract.assertExecutionSnapshot(value)
-  assertTemporalValidity(value, tonumber(date("!%Y%m%d%H%M%S")))
+  assertTemporalValidity(value, currentTimeKey())
   local checksum = Contract.localIdentity(value)
   return { package = value, checksum = checksum, imported_at = date("!%Y-%m-%dT%H:%M:%SZ") }
 end
@@ -37,7 +41,7 @@ function Plan.verify(stored)
   if type(stored) ~= "table" or type(stored.package) ~= "table" or type(stored.checksum) ~= "string" then return false, "计划包存储结构无效" end
   local ok, message = pcall(Contract.assertExecutionSnapshot, stored.package)
   if not ok then return false, tostring(message) end
-  local temporalOk, temporalMessage = pcall(assertTemporalValidity, stored.package, tonumber(date("!%Y%m%d%H%M%S")))
+  local temporalOk, temporalMessage = pcall(assertTemporalValidity, stored.package, currentTimeKey())
   if not temporalOk then return false, tostring(temporalMessage) end
   if Contract.localIdentity(stored.package) ~= stored.checksum then return false, "计划包校验和不匹配，可能已被篡改" end
   return true
