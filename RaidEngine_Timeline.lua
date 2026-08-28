@@ -16,6 +16,9 @@ local function captureEncounterLoadout()
   local ok, snapshot = pcall(addon.Loadout.capture, RaidEngineSavedVariables.binding)
   if not ok or type(snapshot) ~= "table" then return false end
   RaidEngineSavedVariables.last_loadout = snapshot
+  if addon.Json and type(addon.Json.encode) == "function" then
+    RaidEngineSavedVariables.last_loadout_export = addon.Json.encode(snapshot)
+  end
   RaidEngineSavedVariables.last_loadout_capture_reason = "ENCOUNTER_START"
   return true
 end

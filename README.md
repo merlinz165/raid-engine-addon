@@ -53,9 +53,10 @@ packages are imported with `/raidengine import <JSON>` and are displayed only; t
 AddOn never auto-casts, moves, or changes a confirmed plan.
 
 When an activity binding is present, the AddOn also captures the current player's
-Loadout automatically at `ENCOUNTER_START` and replaces `last_loadout`. Manual
-`/raidengine capture` remains available when a fresh snapshot is needed outside
-an encounter; automatic capture never performs a protected gameplay action.
+Loadout automatically at `ENCOUNTER_START`, replaces `last_loadout`, and refreshes
+`last_loadout_export`. Manual `/raidengine capture` remains available when a fresh
+snapshot is needed outside an encounter; automatic capture never performs a
+protected gameplay action.
 
 Action-bar spell IDs are captured as a bounded selected-ability observation. This
 is intentionally `PARTIAL`: passive abilities, unbound spells, and the complete
