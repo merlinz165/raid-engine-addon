@@ -10,6 +10,16 @@ local MAX_EVENTS_PER_RECORD = 512
 local MAX_RECORDS_PER_KEY = 64
 local active
 
+local function captureEncounterLoadout()
+  if not RaidEngineSavedVariables or type(RaidEngineSavedVariables.binding) ~= "table" then return false end
+  if not addon.Loadout or type(addon.Loadout.capture) ~= "function" then return false end
+  local ok, snapshot = pcall(addon.Loadout.capture, RaidEngineSavedVariables.binding)
+  if not ok or type(snapshot) ~= "table" then return false end
+  RaidEngineSavedVariables.last_loadout = snapshot
+  RaidEngineSavedVariables.last_loadout_capture_reason = "ENCOUNTER_START"
+  return true
+end
+
 local function currentTime()
   return GetTime and tonumber(GetTime()) or 0
 end
@@ -90,6 +100,7 @@ local function begin(encounterID, difficulty)
     return false
   end
   active = newRecord(math.floor(encounterID), instance, numeric(difficulty) or 0)
+  captureEncounterLoadout()
   return true
 end
 
