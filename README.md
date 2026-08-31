@@ -24,6 +24,19 @@ The adopted project charter is:
 
 `raid-engine/docs/project/raid-engine-addon-project-charter-2026-08-26.md`
 
+## Repository baseline
+
+The authoritative remote is `origin` at
+`git@github.com:merlinz165/raid-engine-addon.git`, and the authoritative default
+branch is `main`. The root `pnpm-lock.yaml` belongs in version control alongside
+`package.json`; do not ignore or delete it as generated local-only state.
+
+This baseline was confirmed by the project owner on 2026-09-01. At that decision
+point the GitHub repository was still empty, so the remote `main` ref and remote
+HEAD remain unverified until the separately authorized initial commit and push.
+The decision and its verification boundary are recorded in
+`raid-engine/docs/project/addon-repository-baseline-2026-09-01.md`.
+
 ## Current implementation status
 
 The first vertical slice has started. `RaidEngine.toc` and the Lua modules provide
