@@ -32,9 +32,11 @@ branch is `main`. The root `pnpm-lock.yaml` belongs in version control alongside
 `package.json`; do not ignore or delete it as generated local-only state.
 
 This baseline was confirmed by the project owner on 2026-09-01. At that decision
-point the GitHub repository was still empty, so the remote `main` ref and remote
-HEAD remain unverified until the separately authorized initial commit and push.
-The decision and its verification boundary are recorded in
+point the GitHub repository was still empty. The initial `main` publication was
+then verified from GitHub and a clean remote checkout at commit `fc8da45`: the
+GitHub default branch and remote HEAD both resolve to `main`, the lockfile checksum
+is preserved, and `pnpm test` passes. The decision and its closure evidence are
+recorded in
 `raid-engine/docs/project/addon-repository-baseline-2026-09-01.md`.
 
 ## Current implementation status
