@@ -24,6 +24,15 @@ The adopted project charter is:
 
 `raid-engine/docs/project/raid-engine-addon-project-charter-2026-08-26.md`
 
+## Local runtime
+
+This repository has no host-side service and therefore intentionally has no
+`start-local.sh`. The AddOn is loaded only by the World of Warcraft client; a shell
+startup script must not copy into the game installation, rewrite SavedVariables,
+or launch the game implicitly. Use `pnpm test` for repository validation, then load
+the AddOn through the developer's explicit WoW AddOns setup when client testing is
+required.
+
 ## Repository baseline
 
 The authoritative remote is `origin` at
