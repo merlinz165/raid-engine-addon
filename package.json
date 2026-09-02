@@ -2,6 +2,7 @@
   "name": "raid-engine-addon",
   "private": true,
   "version": "0.1.0",
+  "packageManager": "pnpm@12.3.0",
   "scripts": {
     "test": "node tests/static.test.mjs"
   }
